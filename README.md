@@ -13,3 +13,6 @@ SkyGameSDK: https://github.com/figurestudios/SkyGameSDK
 
 # Demo
 - Video demo: https://youtu.be/9nHlLQzwdnQ
+
+# Game hint
+- Mechanics are inspired by [rock-paper-scissors](https://ibb.co/VSp2Xcq).
