@@ -16,3 +16,8 @@ SkyGameSDK: https://github.com/figurestudios/SkyGameSDK
 
 # Game hint
 - Mechanics are inspired by [rock-paper-scissors](https://ibb.co/VSp2Xcq).
+
+# Coming soon
+- MySky login and DACs
+- Improved UI and battle log
+- Replay after a finished battle
