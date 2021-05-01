@@ -1,7 +1,7 @@
 # ArmyClash
 Game showing use of SkyGameSDK.
 
-[Play the game](https://0002nj5otsnbao0eavnqmf91ochg07eidj2dnigeh666rji22bkbi8o.siasky.net/) (latest version)
+[Play the game](https://000fusviuuh92erg700iec3mq73j2dkqc4u3ga3ulae3ueumamrvb4o.siasky.net/) (latest version)
 
 SkyGameSDK: https://github.com/figurestudios/SkyGameSDK
 
@@ -9,7 +9,7 @@ SkyGameSDK: https://github.com/figurestudios/SkyGameSDK
 - Download the project data [here](https://siasky.net/CACVYjn9O3FclEcMnlLozdbhl3umCIqSGp17cXAokysAww) and unzip it.
 - Open the project in unity, make sure platform is set to WebGL.
 - Build and Run the project into the folder SkyGameSDK Example\build.
-- Lastly replace the generated index.html file in SkyGameSDK Example\build by the one located in the SkyGameSDK Example folder.
+- Lastly replace the generated index.html file in SkyGameSDK Example\build by the one located in the build folder on this repository.
 
 # Demo
 - Video demo: https://youtu.be/9nHlLQzwdnQ
