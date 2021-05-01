@@ -26,7 +26,7 @@
       var revisions = 0; //revision number, gets added on every revision in the revision function
       var data = Math.random().toString(); //random string
       var friendsPublicKey;
-      var canRead = false;
+      var canRead = true;
       var hasInitialized = false;
       function parseUrl(){ //if the link includes a hashtag, it will change the random value already assigned, if not, create a link + some logic to get friends public key
         if (document.location.toString().includes("#")){
@@ -36,6 +36,7 @@
           const { publicKey } = skynet.genKeyPairFromSeed(data2);
           skylink = "sia://" + hnsDomain + "#/" + data + "#/" + data2; //edits the skylink so that it may work for the contentrecord DAC
           friendsPublicKey = publicKey;
+          console.log("Friends key" + friendsPublicKey);
         } else {
           var random = Math.random().toString();
           var random2 = random + "#/" + data; //adding our random data as to value convenience/how short the link is over how secure the keys are - can be changed
@@ -43,6 +44,7 @@
           skylink = "sia://" + hnsDomain + "/#/" + random + "#/" + data; //edits the skylink so that it may work for the contentrecord DAC
           const { publicKey } = skynet.genKeyPairFromSeed(random);
           friendsPublicKey = publicKey;
+          console.log("Friends key" + friendsPublicKey);
         }
       }
       parseUrl();
@@ -137,11 +139,10 @@
   </head>
   <body>
     <div class="webgl-content">
-      <div id="unityContainer" style="width: 960px; height: 800px"></div>
-      <div class="footer">
-        <div class="webgl-logo"></div>
-        <div class="fullscreen" onclick="unityInstance.SetFullscreen(1)"></div>
-      </div>
+      <div id="unityContainer" style="width: 960px; height: 700px; position: absolute; left: 50%; top: 50%; -webkit-transform: translate(-50%, -50%); transform: translate(-50%, -50%)"></div>
     </div>
+    <script>
+      document.querySelector("body").style.backgroundColor = "#000000";
+    </script>
   </body>
 </html>
