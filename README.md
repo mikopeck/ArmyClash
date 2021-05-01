@@ -6,7 +6,7 @@ Game showing use of SkyGameSDK.
 SkyGameSDK: https://github.com/figurestudios/SkyGameSDK
 
 # Setup
-- Download the project data [here](https://siasky.net/CACVYjn9O3FclEcMnlLozdbhl3umCIqSGp17cXAokysAww) and unzip it.
+- Download the project data [here](https://siasky.net/AACZvuQmhE7TQ3sdRUhOYYKhCA_ay_dlQjhHZT8ut56DkQ) and unzip it.
 - Open the project in unity, make sure platform is set to WebGL.
 - Build and Run the project into the folder SkyGameSDK Example\build.
 - Lastly replace the generated index.html file in SkyGameSDK Example\build by the one located in the build folder on this repository.
