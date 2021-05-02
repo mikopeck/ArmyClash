@@ -106,7 +106,7 @@
           const { entry, signature } = await client.registry.getEntry(friendsPublicKey, dataKey);
           if (entry != null){ //simple check not to spam logs & contentrecord
             gameInstance.SendMessage(unityCommunicatorObject, unityRecieverFunction, entry.data); //sends data to unity
-            console.log("recieved data " + entry.data);
+            //console.log("recieved data " + entry.data); //Cheating lol
             //setContentRecord(skylink, entry.data); //adds the lobby link + read data to the contentrecord
           }
         } catch (error) {

@@ -4,8 +4,11 @@ using UnityEngine.UI;
 
 public class PluginSampleScript : MonoBehaviour
 {
-    Text enemyHp;
-    Text ourHp;
+    Text enemyUnits;
+    Text ourUnits;
+    Text ourRangers;
+    Text ourFootmen;
+    Text ourHorsemen;
     Text fightInfo;
     Text round;
     Text turnComplete;
@@ -13,28 +16,53 @@ public class PluginSampleScript : MonoBehaviour
     public static string _ourChoice;
     GameObject endScreen;
 
+    public int rangerNo
+	{
+		get {return int.Parse(ourRangers.text.Replace("Available: ", string.Empty));}
+        set { ourRangers.text = "Available: " + value; }
+	}
+    public int footmenNo
+    {
+        get { return int.Parse(ourFootmen.text.Replace("Available: ", string.Empty)); }
+        set { ourFootmen.text = "Available: " + value; }
+    }
+    public int horsemenNo
+    {
+        get { return int.Parse(ourHorsemen.text.Replace("Available: ", string.Empty)); }
+        set { ourHorsemen.text = "Available: " + value; }
+    }
+
     public void Start()
     {
-        enemyHp = GameObject.Find("enemyHpText").GetComponent<Text>();
-        ourHp = GameObject.Find("ourHpText").GetComponent<Text>();
+        enemyUnits = GameObject.Find("enemyUnitsText").GetComponent<Text>();
+        ourUnits = GameObject.Find("ourUnitsText").GetComponent<Text>();
         fightInfo = GameObject.Find("fightText").GetComponent<Text>();
         round = GameObject.Find("roundNo").GetComponent<Text>();
         turnComplete = GameObject.Find("turnComplete").GetComponent<Text>();
         lastRound = GameObject.Find("lastRoundText").GetComponent<Text>();
         endScreen = GameObject.Find("EndMessage");
         endScreen?.SetActive(false);
+        ourRangers = GameObject.Find("rangerNo").GetComponent<Text>();
+        ourFootmen = GameObject.Find("footmenNo").GetComponent<Text>();
+        ourHorsemen = GameObject.Find("horsemenNo").GetComponent<Text>();
     }
 
     public void CallFunction(string callerText) //call the PassText function in the .jslib file from inside of unity
     {
-        if (turnComplete.text == "true")
+        if (turnComplete.text != "true")
+            return;
+
+        if (!UnitAvailable(callerText))
 		{
-            fightInfo.text = "You attacked with " + callerText + ".";
-            _ourChoice = callerText;
-            turnComplete.text = "false";
-            round.text = (int.Parse(round.text) + 1).ToString();
-            Plugin.SetFastData(round.text+callerText);
-		}
+            fightInfo.text = "You have no more "+callerText+".";
+            return;
+        }
+
+        fightInfo.text = "You attacked with " + callerText + ".";
+        _ourChoice = callerText;
+        turnComplete.text = "false";
+        round.text = (int.Parse(round.text) + 1).ToString();
+        Plugin.SetFastData(round.text+callerText);
     }
     public void CallExternalFunction(string enemyChoice) // Called when receiving data
     {
@@ -46,7 +74,7 @@ public class PluginSampleScript : MonoBehaviour
 
         if (!int.TryParse(enemyChoice.Substring(0, 1), out int enemyRound))
 		{
-            Debug.Log("Unexpected data recieved: "+enemyChoice);
+            Debug.LogError("Unexpected data recieved: "+enemyChoice);
             return;
 		}
 
@@ -81,46 +109,50 @@ public class PluginSampleScript : MonoBehaviour
 
         if (ourChoice == enemyChoice)
 		{
-            enemyHp.text = (int.Parse(enemyHp.text) - 10).ToString();
-            ourHp.text = (int.Parse(ourHp.text) - 10).ToString();
-            fightInfo.text = $"Your {ourChoice} attacked their {enemyChoice}. You each lost 10 hp.";
-            lastRound.text = "Last round: " + fightInfo.text;
-            return;
+            enemyUnits.text = (int.Parse(enemyUnits.text) - 1).ToString();
+            ourUnits.text = (int.Parse(ourUnits.text) - 1).ToString();
+            Kill(ourChoice);
+            fightInfo.text = $"Your {ourChoice} attacked their {enemyChoice}. Both died.";
 		}
-
-        bool win = false;
-        if (ourChoice == "horsemen") 
-        {
-            win = enemyChoice == "rangers";
-        }
-        else if (ourChoice == "rangers")
+		else
 		{
-            win = enemyChoice == "footmen";
-        }
-        else if (ourChoice == "footmen")
-		{
-            win = enemyChoice == "horsemen";
-		}
+            bool win = false;
+            if (ourChoice == "horsemen")
+            {
+                win = enemyChoice == "rangers";
+            }
+            else if (ourChoice == "rangers")
+            {
+                win = enemyChoice == "footmen";
+            }
+            else if (ourChoice == "footmen")
+            {
+                win = enemyChoice == "horsemen";
+            }
 
-        if (win)
-        {
-            enemyHp.text = (int.Parse(enemyHp.text) - 20).ToString();
-            fightInfo.text = $"Your {ourChoice} attacked their {enemyChoice}. The enemy lost 20 hp.";
-        }
-        else
-        {
-            ourHp.text = (int.Parse(ourHp.text) - 20).ToString();
-            fightInfo.text = $"Your {ourChoice} attacked their {enemyChoice}. You lost 20 hp.";
+            if (win)
+            {
+                enemyUnits.text = (int.Parse(enemyUnits.text) - 1).ToString();
+                fightInfo.text = $"Your {ourChoice} attacked their {enemyChoice}. The enemy lost.";
+            }
+            else
+            {
+                ourUnits.text = (int.Parse(ourUnits.text) - 1).ToString();
+                fightInfo.text = $"Your {ourChoice} attacked their {enemyChoice}. You lost.";
+                Kill(ourChoice);
+            }
         }
 
         lastRound.text = "Last round: " + fightInfo.text;
 
-        if(int.Parse(ourHp.text) <= 0 || int.Parse(enemyHp.text) <= 0)
+        if(int.Parse(ourUnits.text) == 0 || int.Parse(enemyUnits.text) == 0)
 		{
             endScreen.SetActive(true);
             Text endText = GameObject.Find("endText").GetComponent<Text>();
 
-            if (int.Parse(enemyHp.text) <= 0)
+            if (int.Parse(enemyUnits.text) == 0 && int.Parse(ourUnits.text) == 0)
+                endText.text = "Stalemate...";
+            else if (int.Parse(enemyUnits.text) == 0)
                 endText.text = "Victory!";
             else
                 endText.text = "Defeat...";
@@ -138,4 +170,31 @@ public class PluginSampleScript : MonoBehaviour
 	{
         Plugin.ReloadGame();
 	}
+
+    private void Kill(string unitType)
+	{
+        if (unitType == "horsemen")
+            horsemenNo--;
+        else if (unitType == "rangers")
+            rangerNo--;
+        else if (unitType == "footmen")
+            footmenNo--;
+        else
+            Debug.LogError("Unexpected unit to kill: " + unitType);
+	}
+
+    private bool UnitAvailable(string unitType)
+	{
+        if (unitType == "horsemen")
+            return horsemenNo > 0;
+        else if (unitType == "rangers")
+            return rangerNo > 0;
+        else if (unitType == "footmen")
+            return footmenNo > 0;
+		else
+		{
+            Debug.LogError("Unexpected unit to kill: " + unitType);
+            return false;
+		}
+    }
 }
