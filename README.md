@@ -1,7 +1,7 @@
 # ArmyClash
 Game showing use of SkyGameSDK.
 
-[Play the game](https://000fusviuuh92erg700iec3mq73j2dkqc4u3ga3ulae3ueumamrvb4o.siasky.net/) (latest version)
+[Play the game](https://000fgnr66ahnc7suut3u4ulg125elh9h7q1kftotkq2pkufcpnmo9b0.siasky.net/) (latest version)
 
 SkyGameSDK: https://github.com/figurestudios/SkyGameSDK
 
