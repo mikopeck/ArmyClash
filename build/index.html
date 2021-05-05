@@ -14,7 +14,7 @@
       const client = new skynet.SkynetClient("https://siasky.net"); //siasky portal by default, feel free to change
       const dataKey = "myApp"; //enter your game name here if you want - shouldn't be any issues leaving it as is, though
       var gameInstance = UnityLoader.instantiate("unityContainer", "Build/build.json"); //Build/test.json will probably need to be adjusted if you change the name of your project.
-      var hnsDomain = "abughadiyah.hns"; //hns domain string
+      var hnsDomain = "blakerasor.hns"; //hns domain string
       var skylink;
 
       //THESE TOO SHOULD BE CHANGED, IF YOU WANT A STANDALONE GAME
@@ -32,6 +32,7 @@
       function parseUrl(){ //if the link includes a hashtag, it will change the random value already assigned, if not, create a link + some logic to get friends public key
         if (document.location.toString().includes("#")){
           console.log("Includes a hashtag!");
+          gameInstance.SendMessage(unityCommunicatorObject, unityRecieverFunction, "invited");
           homeUrl = document.location.toString().split('#/')[0];
           data = document.location.toString().split('#/')[1];
           data2 = document.location.toString().split('#/')[2];

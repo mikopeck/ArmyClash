@@ -66,6 +66,14 @@ public class PluginSampleScript : MonoBehaviour
     }
     public void CallExternalFunction(string enemyChoice) // Called when receiving data
     {
+        Debug.Log("Recieved data:" + enemyChoice);
+
+        if (enemyChoice == "invited")
+		{
+            GameObject.Find("WelcomeText").SetActive(false);
+            return;
+        }
+
         if (enemyChoice == "ready") // Start fight.
         {
             GameObject.Find("WelcomeMessage").SetActive(false);
@@ -113,7 +121,9 @@ public class PluginSampleScript : MonoBehaviour
             ourUnits.text = (int.Parse(ourUnits.text) - 1).ToString();
             Kill(ourChoice);
             fightInfo.text = $"Your {ourChoice} attacked their {enemyChoice}. Both died.";
-		}
+            FadeColor(fightInfo, Color.yellow);
+            lastRound.CrossFadeColor(Color.yellow, 0, false, false);
+        }
 		else
 		{
             bool win = false;
@@ -134,16 +144,21 @@ public class PluginSampleScript : MonoBehaviour
             {
                 enemyUnits.text = (int.Parse(enemyUnits.text) - 1).ToString();
                 fightInfo.text = $"Your {ourChoice} attacked their {enemyChoice}. The enemy lost.";
+                FadeColor(fightInfo, Color.green);
+                lastRound.CrossFadeColor(Color.green, 0, false, false);
             }
             else
             {
                 ourUnits.text = (int.Parse(ourUnits.text) - 1).ToString();
                 fightInfo.text = $"Your {ourChoice} attacked their {enemyChoice}. You lost.";
+                FadeColor(fightInfo, Color.red);
+                lastRound.CrossFadeColor(Color.red, 0, false, false);
                 Kill(ourChoice);
             }
         }
 
         lastRound.text = "Last round: " + fightInfo.text;
+        lastRound.CrossFadeColor(Color.white, 2, false, true);
 
         if(int.Parse(ourUnits.text) == 0 || int.Parse(enemyUnits.text) == 0)
 		{
@@ -174,11 +189,20 @@ public class PluginSampleScript : MonoBehaviour
     private void Kill(string unitType)
 	{
         if (unitType == "horsemen")
+		{
             horsemenNo--;
+            FadeColor(ourHorsemen, Color.red);
+		}
         else if (unitType == "rangers")
+		{
             rangerNo--;
+            FadeColor(ourRangers, Color.red);
+        }
         else if (unitType == "footmen")
+		{
             footmenNo--;
+            FadeColor(ourFootmen, Color.red);
+        }
         else
             Debug.LogError("Unexpected unit to kill: " + unitType);
 	}
@@ -196,5 +220,11 @@ public class PluginSampleScript : MonoBehaviour
             Debug.LogError("Unexpected unit to kill: " + unitType);
             return false;
 		}
+    }
+
+    private void FadeColor(Text text, Color color)
+	{
+        text.CrossFadeColor(color, 0, false, true);
+        text.CrossFadeColor(Color.white, 2, false, true);
     }
 }

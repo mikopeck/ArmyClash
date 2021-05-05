@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8">
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-    <title>Unity WebGL Player | SkyGameSDK Example</title>
+    <title>Army Clash</title>
     <script src="Build/UnityLoader.js"></script>
     <script src="https://skynet-js.hns.siasky.net/4.0-beta/index.js"></script>
     <script src="https://siasky.net/_AAnblJDpo1aB9bjN5VFsZUTPBasmujkcQuiEDibAO6rQQ"></script>
@@ -14,7 +14,7 @@
       const client = new skynet.SkynetClient("https://siasky.net"); //siasky portal by default, feel free to change
       const dataKey = "myApp"; //enter your game name here if you want - shouldn't be any issues leaving it as is, though
       var gameInstance = UnityLoader.instantiate("unityContainer", "Build/build.json"); //Build/test.json will probably need to be adjusted if you change the name of your project.
-      var hnsDomain = "abughadiyah.hns"; //hns domain string
+      var hnsDomain = "blakerasor.hns"; //hns domain string
       var skylink;
 
       //THESE TOO SHOULD BE CHANGED, IF YOU WANT A STANDALONE GAME
@@ -26,11 +26,14 @@
       var revisions = 0; //revision number, gets added on every revision in the revision function
       var data = Math.random().toString(); //random string
       var friendsPublicKey;
-      var canRead = true;
+      var mySkyLogin = false;
       var hasInitialized = false;
+      var homeUrl;
       function parseUrl(){ //if the link includes a hashtag, it will change the random value already assigned, if not, create a link + some logic to get friends public key
         if (document.location.toString().includes("#")){
           console.log("Includes a hashtag!");
+          gameInstance.SendMessage(unityCommunicatorObject, unityRecieverFunction, "invited");
+          homeUrl = document.location.toString().split('#/')[0];
           data = document.location.toString().split('#/')[1];
           data2 = document.location.toString().split('#/')[2];
           const { publicKey } = skynet.genKeyPairFromSeed(data2);
@@ -38,6 +41,7 @@
           friendsPublicKey = publicKey;
           console.log("Friends key" + friendsPublicKey);
         } else {
+          homeUrl = document.location.toString();
           var random = Math.random().toString();
           var random2 = random + "#/" + data; //adding our random data as to value convenience/how short the link is over how secure the keys are - can be changed
           document.location = document.location + "#/" + random + "#/" + data;
@@ -54,17 +58,15 @@
       var oldData;
 
       async function getJSON() { //retrieve slow data from skydb, any amount of data is fine
-        if (canRead == true){
-          try {
-            const { data, skylink } = await client.db.getJSON(friendsPublicKey, dataKey); //gets data and skylink from skyDB
-            if (data != null){ //simple check not to spam logs & contentrecord
-              gameInstance.SendMessage(unityCommunicatorObject, unityRecieverFunction, data.example); //sends data.example(json) to Unity
-              console.log("retrieved slow data: " + data.example);
-              //setContentRecord(skylink, data.example); //adds the lobby link + read data to the contentrecord
-            }
-            } catch (error) {
-            console.log(error);
+        try {
+          const { data, skylink } = await client.db.getJSON(friendsPublicKey, dataKey); //gets data and skylink from skyDB
+          if (data != null){ //simple check not to spam logs & contentrecord
+            gameInstance.SendMessage(unityCommunicatorObject, unityRecieverFunction, data.example); //sends data.example(json) to Unity
+            console.log("retrieved slow data: " + data.example);
+            //setContentRecord(skylink, data.example); //adds the lobby link + read data to the contentrecord
           }
+          } catch (error) {
+          console.log(error);
         }
       }
 
@@ -85,34 +87,36 @@
         var revision = BigInt(revisions);
         var data = _data;
         revisions++;
+        var errorMessage = null;
         const entry = { dataKey, data, revision };
-        try {
-          await client.registry.setEntry(privateKey, entry);
-          console.log("sent fast data " + data);
-          //setContentRecord(skylink, data); //adds the lobby link + set data to the contentrecord
-        } catch (error) {
-          console.log(error);
-        }
+
+        do{
+          try {
+            await client.registry.setEntry(privateKey, entry);
+            console.log("sent fast data " + data);
+           //setContentRecord(skylink, data); //adds the lobby link + set data to the contentrecord
+          } catch (error) {
+            console.log(error);
+            errorMessage = error;
+          }
+        }while (errorMessage != null)
       }
 
       async function getEntry(){ //get fast data =)
-        if (canRead == true){
-          try {
-            const { entry, signature } = await client.registry.getEntry(friendsPublicKey, dataKey);
-            if (entry != null){ //simple check not to spam logs & contentrecord
-              gameInstance.SendMessage(unityCommunicatorObject, unityRecieverFunction, entry.data); //sends data to unity
-              console.log("recieved data " + entry.data);
-              //setContentRecord(skylink, entry.data); //adds the lobby link + read data to the contentrecord
-            }
-          } catch (error) {
-            console.log(error);
+        try {
+          const { entry, signature } = await client.registry.getEntry(friendsPublicKey, dataKey);
+          if (entry != null){ //simple check not to spam logs & contentrecord
+            gameInstance.SendMessage(unityCommunicatorObject, unityRecieverFunction, entry.data); //sends data to unity
+            //console.log("recieved data " + entry.data); //Cheating lol
+            //setContentRecord(skylink, entry.data); //adds the lobby link + read data to the contentrecord
           }
+        } catch (error) {
+          console.log(error);
         }
       }
       
       async function initMySky(){
         if (hasInitialized == false){
-          hasInitialized = true;
           const mySky = await client.loadMySky(hnsDomain, {debug: true});
           const isLoggedIn = await mySky.checkLogin();
           await mySky.loadDacs(contentRecord);
@@ -120,21 +124,31 @@
               await mySky.requestLoginAccess();
           }
           if (isLoggedIn){
-            canRead = true;
+            mySkyLogin = true;
+            hasInitialized = true;
           }
         }
       }
       
-      async function setContentRecord(_skylink, _data){
-        if (oldData != _data && canRead == true){ //we need to make sure mysky is initialized
-          oldData = _data;
-          await contentRecord.recordNewContent({
-            _skylink,
-            metadata: {"gameData": _data} //exchange to your own personal needs - this is just an example and is generic
+      async function setContentRecord(_data){
+        try{
+          if (oldData != _data && mySkyLogin == true){ //we need to make sure mysky is initialized
+            oldData = _data;
+            await contentRecord.recordNewContent({
+              skylink,
+              metadata: {"gameData": _data} //exchange to your own personal needs - this is just an example and is generic
             });
             console.log("added data " + _data + " to contentrecord with skylink " + skylink);
+          }
+        } catch (error) {
+          console.log(error);
         }
       }
+
+      async function reloadGame(){
+        window.location.href = homeUrl;
+      }
+
     </script>
   </head>
   <body>
