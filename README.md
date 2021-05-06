@@ -12,5 +12,4 @@ Game showing use of [SkyGameSDK](https://github.com/figurestudios/SkyGameSDK).
 - Video demo: https://youtu.be/9nHlLQzwdnQ (old version)
 
 # Coming soon
-- MySky login and DACs
-- Upload stats to MySky
+- Win/loss stats
